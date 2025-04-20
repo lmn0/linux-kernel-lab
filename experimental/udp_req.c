@@ -24,15 +24,15 @@
 #include <time.h>
 
 
-struct DNSheader
-{
-    unsigned short id;
-    unsigned short flags;
-    unsigned short qdcount;
-    unsigned short ancount;
-    unsigned short nscount;
-    unsigned short arcount;
-};
+// struct DNSheader
+// {
+//     unsigned short id;
+//     unsigned short flags;
+//     unsigned short qdcount;
+//     unsigned short ancount;
+//     unsigned short nscount;
+//     unsigned short arcount;
+// };
 
 struct ETHheader
 {
@@ -66,21 +66,9 @@ struct DNS_QUESTION {
 } ;
 
 
-
-
 int _udpsocket = 0;
 int _srcip = 0;
 int _dnsip = 0;
-int _sendinterval = 0;
-int _querycount = 0;
-
-unsigned short checksum(unsigned short *data, size_t len) {
-  unsigned short sum = 0;
-  for (size_t i = 0; i < len; i++) {
-    sum += data[i];
-  }
-  return sum;
-}
 
 int  convert_domain(char *domain)
 {
@@ -111,32 +99,6 @@ int  convert_domain(char *domain)
     return pout - &out[0] + 1;
 }
 
-int build_datagram(char *datagram, unsigned int payload_size, uint32_t src_ip, uint32_t dst_ip, u_int16_t port)
-{
-    struct ip *ip_hdr = (struct ip *) datagram;
-    struct udphdr *udp_hdr = (struct udphdr *) (datagram + sizeof (struct ip));
-
-    ip_hdr->ip_hl = 5; //header length
-    ip_hdr->ip_v = 4; //version
-    ip_hdr->ip_tos = 0; //tos
-    ip_hdr->ip_len = sizeof(struct ip) + sizeof(struct udphdr) + payload_size;  //length
-    ip_hdr->ip_id = 0; //id
-    ip_hdr->ip_off = 0; //fragment offset
-    ip_hdr->ip_ttl = 255; //ttl
-    ip_hdr->ip_p = 17; //protocol
-    ip_hdr->ip_sum = 0; //temp checksum
-    ip_hdr->ip_src.s_addr = src_ip; //src ip - spoofed
-    ip_hdr->ip_dst.s_addr = dst_ip; //dst ip
-
-    udp_hdr->uh_sport = port; //src port - spoofed
-    udp_hdr->uh_dport = htons(53); //dst port
-    udp_hdr->uh_ulen = htons(sizeof(struct udphdr) + payload_size); //length
-    udp_hdr->uh_sum = 0; //checksum - disabled
-
-    ip_hdr->ip_sum = checksum((unsigned short *) datagram, ip_hdr->ip_len >> 1); //real checksum
-
-    return ip_hdr->ip_len >> 1;
-}
 
 
 

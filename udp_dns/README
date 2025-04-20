@@ -1,0 +1,6 @@
+This is a simple C program to send a DNS UDP packet to resolve a name to IPv4 address.
+
+Essentially, there are ETH, IP and UDP header before DNS header in a DNS datagram.
+As you may notice in the code, it only requires you to build DNS datagram starting from DNS header, rest of the headers are added by other layers.
+
+

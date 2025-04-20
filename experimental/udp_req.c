@@ -1,5 +1,9 @@
 
 
+/*
+*  This is a simple C program to send a DNS UDP packet to resolve a name
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -203,7 +207,7 @@ int main(int argc, char **argv)
 
     dns_addr.sin_family = PF_INET;
     dns_addr.sin_port = htons(53);
-    dns_addr.sin_addr.s_addr = htonl((((((192 << 8) | 168) << 8) | 1) << 8) | 1);
+    dns_addr.sin_addr.s_addr = _dnsip;//htonl((((((192 << 8) | 168) << 8) | 1) << 8) | 1);
 
 
     for (size_t i = 0; i < sizeof(buffer_send); ++i) {
@@ -230,7 +234,7 @@ int main(int argc, char **argv)
     struct ip *ip_hdr = (struct ip *) &buffer_recv[0];
 
     unsigned int *strFirst;
-    
+
     close(_udpsocket);
     return 0;
 }

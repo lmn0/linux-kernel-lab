@@ -1,7 +1,7 @@
 
 
 /*
-*  This is a simple C program to send a DNS UDP packet to resolve a name
+*  This is a simple C program to send a DNS UDP packet to resolve a name to IPv4 address
 */
 
 #include <stdio.h>
@@ -65,6 +65,15 @@ struct DNS_QUESTION {
     unsigned short qclass; // Query class (e.g., IN for internet)
 } ;
 
+struct DNS_ANS {
+    unsigned char *name; // Domain name
+    unsigned short type; // Query type (e.g., A, MX, CNAME)
+    unsigned short class; // Query class (e.g., IN for internet)
+    unsigned int ttl;
+    unsigned short datalen;
+    unsigned char *cname;
+} ;
+
 
 int _udpsocket = 0;
 int _srcip = 0;
@@ -114,7 +123,7 @@ int main(int argc, char **argv)
     int one = 1;
     const int *optval = &one;
 
-    _udpsocket = socket(AF_INET, SOCK_DGRAM, 17); //socket(AF_INET, SOCK_DGRAM, 17);
+    _udpsocket = socket(AF_INET, SOCK_DGRAM, 17); 
 
 
     if (setsockopt(_udpsocket, SOL_SOCKET ,SO_REUSEADDR, optval, sizeof(one)))
@@ -169,33 +178,32 @@ int main(int argc, char **argv)
 
     dns_addr.sin_family = PF_INET;
     dns_addr.sin_port = htons(53);
-    dns_addr.sin_addr.s_addr = _dnsip;//htonl((((((192 << 8) | 168) << 8) | 1) << 8) | 1);
+    dns_addr.sin_addr.s_addr = _dnsip;
 
 
-    for (size_t i = 0; i < sizeof(buffer_send); ++i) {
-        printf("%02x ", buffer_send[i]);
-    }
+    // for (size_t i = 0; i < sizeof(buffer_send); ++i) {
+    //     printf("%02x ", buffer_send[i]);
+    // }
 
     bytes_sent = sendto(_udpsocket, buffer_send, len, 0, (struct sockaddr *)&dns_addr, sizeof(dns_addr));
 
-    printf("\n%d\n\nRecieving Bytes\n",bytes_sent);
-
     bytes_received = recvfrom(_udpsocket, buffer_recv, 1500, 0, (struct sockaddr *)&dns_addr,(socklen_t *) sizeof(dns_addr));
 
-    for (size_t i = 0; i < sizeof(buffer_recv); ++i) {
-        printf("%c", buffer_recv[i]);
-    }
+
+    //dns_header = (struct DNS_HEADER *)(&buffer_recv[0]);
+    //int num_ans = ntohs(dns_header->ans_count);
+    struct DNS_ANS *dns_ans = (struct DNS_ANS *)(&buffer_recv[0] + len);
+
+
+    //for(int i=0; i<num_ans; i++){
+
+    //}
+
+
+    // for (size_t i = 0; i < sizeof(buffer_recv); ++i) {
+    //     printf("%c", buffer_recv[i]);
+    // }
     printf("\n%d\n",bytes_received);
-
-    char* data = (char*) (&buffer_recv[0]  + sizeof(struct ip) + sizeof(struct udphdr) + sizeof(struct DNSheader));
-    int s, bytes;
-
-
-    struct udphdr *udp_hdr = (struct udphdr *)(&buffer_recv[0] + sizeof(struct ip));
-
-    struct ip *ip_hdr = (struct ip *) &buffer_recv[0];
-
-    unsigned int *strFirst;
 
     close(_udpsocket);
     return 0;
